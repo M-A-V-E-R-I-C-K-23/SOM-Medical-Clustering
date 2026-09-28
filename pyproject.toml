@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "medical-som-clustering"
+version = "0.1.0"
+description = "Medical Data Clustering Using Self-Organizing Maps (SOM) — B.Tech Neural Networks Project"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "minisom",
+    "matplotlib",
+    "seaborn",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ml*"]
+
+[tool.pyrefly]
+# Project root is medical-som-clustering/
+# This tells Pyrefly to look here for package resolution (ml.src.*)
+search_path = ["."]
+python_interpreter = "C:/Program Files/Python313/python.exe"

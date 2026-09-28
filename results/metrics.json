@@ -1,0 +1,109 @@
+{
+  "selected_grid": "9x9",
+  "selected_k": 3,
+  "quantization_error": 2.343352,
+  "topographic_error": 0.144112,
+  "silhouette_score": 0.342909,
+  "ari": 0.506959,
+  "cluster_sizes": {
+    "0": {
+      "count": 385,
+      "pct": 67.7
+    },
+    "1": {
+      "count": 122,
+      "pct": 21.4
+    },
+    "2": {
+      "count": 62,
+      "pct": 10.9
+    }
+  },
+  "grid_selection_reason": "Grid 9x9 selected. Composite score: 0.5577. QE=2.3434, TE=0.1441, Silhouette=0.3429, ARI=0.5070.",
+  "grid_comparison": [
+    {
+      "grid": "9x9",
+      "n_rows": 9,
+      "n_cols": 9,
+      "n_neurons": 81,
+      "k": 3,
+      "quantization_error": 2.343352,
+      "topographic_error": 0.144112,
+      "silhouette_score": 0.342909,
+      "ari": 0.506959,
+      "cluster_sizes": {
+        "0": {
+          "count": 385,
+          "pct": 67.7
+        },
+        "1": {
+          "count": 122,
+          "pct": 21.4
+        },
+        "2": {
+          "count": 62,
+          "pct": 10.9
+        }
+      },
+      "composite_score": 0.5577
+    },
+    {
+      "grid": "11x11",
+      "n_rows": 11,
+      "n_cols": 11,
+      "n_neurons": 121,
+      "k": 3,
+      "quantization_error": 2.130398,
+      "topographic_error": 0.15993,
+      "silhouette_score": 0.321678,
+      "ari": 0.496411,
+      "cluster_sizes": {
+        "0": {
+          "count": 371,
+          "pct": 65.2
+        },
+        "1": {
+          "count": 112,
+          "pct": 19.7
+        },
+        "2": {
+          "count": 86,
+          "pct": 15.1
+        }
+      },
+      "composite_score": 0.1647
+    },
+    {
+      "grid": "13x13",
+      "n_rows": 13,
+      "n_cols": 13,
+      "n_neurons": 169,
+      "k": 3,
+      "quantization_error": 1.968902,
+      "topographic_error": 0.15993,
+      "silhouette_score": 0.31958,
+      "ari": 0.542126,
+      "cluster_sizes": {
+        "0": {
+          "count": 86,
+          "pct": 15.1
+        },
+        "1": {
+          "count": 368,
+          "pct": 64.7
+        },
+        "2": {
+          "count": 115,
+          "pct": 20.2
+        }
+      },
+      "composite_score": 0.5
+    }
+  ],
+  "validation_run": {
+    "phase": "Phase 6 Validation",
+    "status": "verified",
+    "seed": 42,
+    "n_iterations": 10000
+  }
+}
