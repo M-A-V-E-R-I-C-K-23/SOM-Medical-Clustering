@@ -46,7 +46,7 @@ A production-ready **FastAPI** backend exposes the trained model, metrics, topol
 +---------------------------------------------------------------------------+-+
 |  6. Evaluation Metrics:                                                   | |
 |     - Quantization Error (QE)      - Topographic Error (TE)               | |
-|     - Silhouette Score             - Adjusted Rand Index (ARI with y) <---+ |
+|     - Silhouette Score (Samples)   - Adjusted Rand Index (ARI with y) <---+ |
 +-----------------------------------------------------------------------------+
 ```
 
@@ -54,6 +54,9 @@ A production-ready **FastAPI** backend exposes the trained model, metrics, topol
 1. **Strict Data Isolation**: Ground truth diagnosis labels ($y$) **never** enter feature scaling, SOM training, or K-Means clustering. They are introduced solely at step 6 for post-hoc validation.
 2. **Two-Level Clustering**: K-Means is performed on the **SOM codebook vectors (81 x 30)** rather than raw sample points. This preserves the topological structure learned by the SOM, smooths local noise, and significantly improves cluster stability.
 3. **Reproducibility**: All random operations utilize a fixed seed (`seed = 42`).
+4. **Dual Silhouette Evaluation**:
+   - **K-Selection Routine (`select_k_elbow`)**: Evaluates the **codebook silhouette score** on the flattened prototype vectors (`codebook_flat` $\in \mathbb{R}^{N_{\text{neurons}} \times 30}$) across candidate $K \in [2, 8]$ alongside WCSS inertia to identify the optimal number of clusters ($K=3$, where codebook silhouette is 0.3687 on the 9x9 lattice).
+   - **Final Pipeline Evaluation (`compute_all_metrics`)**: Evaluates the **sample-space silhouette score (`0.3429`)** on standardized patient samples ($X_{\text{scaled}} \in \mathbb{R}^{569 \times 30}$) with their final cluster assignments (`sample_clusters`). This quantifies clinical cluster cohesion and separation in the original 30-dimensional continuous feature space.
 
 ---
 
@@ -65,20 +68,20 @@ A production-ready **FastAPI** backend exposes the trained model, metrics, topol
 | :--- | :---: | :--- |
 | **Quantization Error (QE)** | `2.3434` | Average Euclidean distance between samples and their BMU. |
 | **Topographic Error (TE)** | `0.1441` | Proportion of samples whose 1st and 2nd BMUs are not adjacent; measures topology preservation. |
-| **Silhouette Score** | `0.3429` | Cluster cohesion vs. separation evaluated on codebook space. |
+| **Silhouette Score (Sample Space)** | `0.3429` | Cluster cohesion vs. separation evaluated on standardized patient samples ($X_{\text{scaled}}$, 569 samples) with their BMU-derived cluster assignments. *(Note: Codebook-space silhouette is computed separately during K-selection on neuron prototypes, yielding 0.3687 for K=3 on 9x9).* |
 | **Adjusted Rand Index (ARI)** | `0.5070` | Post-hoc concordance with true diagnosis (chance = 0.0, perfect = 1.0). |
 
 ### 2. Grid Optimization & Selection
 
-Three grid architectures were trained and systematically benchmarked using an equal-weight composite score across normalized QE, TE, Silhouette, and ARI:
+Three grid architectures were trained and systematically benchmarked using an equal-weight composite score across normalized QE, TE, Silhouette (sample space), and ARI:
 
-| Grid Size | Neurons | QE (lower better) | TE (lower better) | Silhouette (higher better) | ARI (higher better) | Composite Score | Status |
+| Grid Size | Neurons | QE (lower better) | TE (lower better) | Silhouette (Samples, higher better) | ARI (higher better) | Composite Score | Status |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **9 x 9** | **81** | **2.3434** | **0.1441** | **0.3429** | **0.5070** | **0.5577** | **Selected Best Configuration** |
 | 11 x 11 | 121 | 2.1304 | 0.1599 | 0.3217 | 0.4964 | 0.1647 | Initial Phase 3 Baseline |
 | 13 x 13 | 169 | 1.9689 | 0.1599 | 0.3196 | 0.5421 | 0.5000 | Evaluated Alternative |
 
-*Note: While larger grids achieve lower quantization error by allocating more neurons, the 9x9 grid provides superior topology preservation (lower TE), better cluster separation (higher Silhouette), and achieves the highest composite rank.*
+*Note: While larger grids achieve lower quantization error by allocating more neurons, the 9x9 grid provides superior topology preservation (lower TE), better sample-space cluster separation (Silhouette = 0.3429 on standardized samples), and achieves the highest composite rank. The K-selection routine separately analyzes codebook-space silhouette on the flattened neuron weights to identify optimal K.*
 
 ### 3. Discovered Clinical Clusters
 
@@ -206,7 +209,7 @@ jupyter notebook ml/notebooks/som_analysis.ipynb
 | `GET` | `/api/dataset` | Returns feature statistics, row counts (569), feature names (30), and ground-truth label distributions. |
 | `GET` | `/api/som` | Returns the 9x9 U-Matrix, neuron hit map, training error history, QE, and TE. |
 | `GET` | `/api/clusters` | Returns codebook cluster assignments, sample cluster distributions, and post-hoc benign/malignant proportions. |
-| `GET` | `/api/evaluation` | Returns the final four evaluation metrics (QE, TE, Silhouette, ARI) and full grid comparison table. |
+| `GET` | `/api/evaluation` | Returns the final four evaluation metrics (QE, TE, sample-space Silhouette, ARI) and full grid comparison table. |
 | `GET` | `/` | Service health status and registered endpoint directory. |
 
 ### Example API Request: Train Pipeline

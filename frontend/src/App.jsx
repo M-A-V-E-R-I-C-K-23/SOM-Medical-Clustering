@@ -702,7 +702,7 @@ export default function App() {
                   <div className="stat-box">
                     <div className="stat-label">Silhouette Score</div>
                     <div className="stat-value">{evaluation.silhouette_score?.toFixed(4)}</div>
-                    <div className="stat-sub">Codebook cluster separation</div>
+                    <div className="stat-sub">Sample-space cluster separation</div>
                   </div>
                   <div className="stat-box">
                     <div className="stat-label">Adjusted Rand Index (ARI)</div>
@@ -719,7 +719,7 @@ export default function App() {
                   </div>
                   <p className="card-desc">
                     Comprehensive evaluation across candidate SOM dimensions (9×9, 11×11, 13×13).
-                    The 9×9 lattice was chosen algorithmically for minimizing Topographic Error while maintaining superior codebook cluster separation.
+                    The 9×9 lattice was chosen algorithmically for minimizing Topographic Error while maintaining superior sample-space cluster separation.
                   </p>
 
                   <div className="table-container">
