@@ -115,10 +115,11 @@ medical-som-clustering/
 |       |-- clustering.py         # K-Means on codebook vectors, sample BMU cluster assignment
 |       +-- evaluation.py         # QE, TE, Silhouette, ARI, composite scoring utilities
 |
-|-- backend/                      # Production FastAPI REST Backend (Clean & Consolidated)
+|-- backend/                      # FastAPI REST backend
 |   |-- __init__.py
-|   |-- main.py                   # FastAPI app, Pydantic response models, and 5 REST endpoints
-|   +-- pipeline.py               # In-memory ML pipeline orchestration service
+|   |-- main.py                   # FastAPI app and router registration
+|   |-- pipeline.py               # In-memory ML pipeline orchestration service
+|   +-- routes/                   # Training, dataset, SOM, clusters, and evaluation endpoints
 |
 |-- results/
 |   |-- metrics.json              # Canonical verified benchmark metrics & grid comparison
@@ -129,7 +130,10 @@ medical-som-clustering/
 |       |-- 17_diagnosis_per_cluster_9x9_final.png# Post-hoc clinical distribution
 |       +-- 18_pca_scatter_9x9_final.png          # PCA projection of discovered clusters
 |
-+-- frontend/                     # Interactive Web Dashboard (Phase 7 - Upcoming)
++-- frontend/                     # Minimal React + Vite + Plotly dashboard
+    +-- src/
+        |-- App.jsx               # App entry, API requests, and interactive views
+        +-- index.css             # Responsive layout and styling
 ```
 
 ---
@@ -138,6 +142,7 @@ medical-som-clustering/
 
 ### 1. Prerequisites
 - Python 3.10 to 3.13
+- Node.js 22 LTS and npm for the frontend
 - Git
 
 ### 2. Environment Setup
@@ -192,7 +197,38 @@ Once running, access the interactive API documentation:
 
 ---
 
-### C. Run the Jupyter Notebook Analysis
+### C. Start and Use the Frontend
+
+Keep the backend above running on port **8000**. In a second terminal, from the project root:
+
+```powershell
+cd frontend
+npm.cmd ci
+npm.cmd run dev
+```
+
+Install dependencies only on first setup or after the lockfile changes. On macOS/Linux, use `npm` instead of `npm.cmd`.
+Open **http://localhost:5173**. Vite forwards `/api` requests to the backend automatically.
+
+1. Click **Train model**. It uses the validated defaults: 9×9 SOM, K=3, 10,000 iterations, seed 42.
+2. Wait for **map ready**. Training and refresh buttons are disabled while a request is running.
+3. Use **Maps**, **Clusters**, and **Evaluation** to jump between sections. Hover over plots to inspect values.
+4. In **Clusters**, compare the diagnosis counts and select any of the 30 measurements to compare cluster means in original units.
+5. In **Evaluation**, inspect the four current metrics and training curve. Expand **Compare saved grid experiments** for historical benchmarks; these do not change when you retrain.
+6. **Refresh** loads the current backend results without training. **Retrain model** runs the default pipeline again.
+
+The backend holds results in memory. After restarting it, click Refresh, then Train model. If a request fails, the page explains the error and identifies any previously loaded data still displayed. The backend tries UCI online first and falls back to the bundled CSV.
+
+To verify a production build locally, keep the backend running and use:
+
+```powershell
+npm.cmd run build
+npm.cmd run preview
+```
+
+Open **http://localhost:4173**. Both development and preview servers forward API requests. A separate static deployment needs the same `/api` reverse proxy. Stop a server with **Ctrl+C** in its terminal.
+
+### D. Run the Jupyter Notebook Analysis
 Open and execute the end-to-end exploratory data analysis and SOM experiments:
 
 ```bash
@@ -249,7 +285,7 @@ All high-resolution figures are automatically generated in [`results/figures/`](
   from ml.src import evaluation
   ```
 - **Unsupervised discipline**: Diagnosis labels ($y$) are isolated upon ingestion. No pipeline component uses $y$ prior to `evaluation.py`.
-- **Typing & Schemas**: All API payloads are strictly validated using Pydantic models in `backend/main.py`.
+- **Training parameters**: Validated using the Pydantic request model in `backend/routes/train.py`.
 
 ---
 
@@ -261,4 +297,4 @@ All high-resolution figures are automatically generated in [`results/figures/`](
 - [x] **Phase 4**: Two-Level K-Means Clustering on Codebook Vectors & Sample BMU Mapping
 - [x] **Phase 5**: Hyperparameter Optimization (9x9 vs 11x11 vs 13x13 grid benchmarking)
 - [x] **Phase 6**: FastAPI Backend Implementation & Validation Test Suite (19/19 checks PASS)
-- [ ] **Phase 7**: Interactive Web Frontend (React + Vite Dashboard)
+- [x] **Phase 7**: Minimal interactive frontend (React + Vite + Plotly), integrated with the FastAPI backend
